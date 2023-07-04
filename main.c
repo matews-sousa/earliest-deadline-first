@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 #include "lcm.h"
 #include "task.h"
 
@@ -54,6 +55,17 @@ void schedule()
     execution_times[j] = tasks[j].execution_time;
   }
 
+  char timeline[num_tasks][lcmp + 1];
+
+  for (int i = 0; i < num_tasks; i++)
+  {
+    for (int j = 0; j < lcmp; j++)
+    {
+      timeline[i][j] = '-';
+    }
+    timeline[i][lcmp] = '\0';
+  }
+
   // inicia a execução do algoritmo até o MMC dos períodos
   while (time < lcmp)
   {
@@ -81,6 +93,7 @@ void schedule()
         // o tempo que foi reduzido, volta ao original para que possa executar corretamente numa próxima execução
         tasks[earliest_deadline_task].execution_time = execution_times[earliest_deadline_task];
       }
+      timeline[earliest_deadline_task][time] = 'o';
     }
 
     time++;
@@ -96,6 +109,11 @@ void schedule()
       }
     }
   }
+
+  for (int i = 0; i < num_tasks; i++)
+  {
+    printf("T%d | %s\n", i, timeline[i]);
+  }
 }
 
 int get_earliest_deadline_task_index()
@@ -108,7 +126,7 @@ int get_earliest_deadline_task_index()
     if (tasks[i].is_executing)
     {
       // pega a tarefa com menor deadline
-      if (earliest_deadline_task == -1 || tasks[i].deadline < tasks[i].deadline)
+      if (earliest_deadline_task == -1 || tasks[i].deadline < tasks[earliest_deadline_task].deadline)
         earliest_deadline_task = i;
     }
   }
@@ -145,7 +163,7 @@ void read_system()
   FILE *file;
   char line[100];
 
-  file = fopen("samples/sistema1.txt", "r");
+  file = fopen("samples/sistema3.txt", "r");
   if (file == NULL)
   {
     printf("Failed to open the file.\n");
