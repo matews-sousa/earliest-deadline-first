@@ -11,24 +11,29 @@ Task tasks[100];
 int num_tasks = 0;
 int lcmp = 0;
 
-void read_system();
+void read_system(const char* filename);
 void print_system();
-bool is_schedulable();
+float utilization();
 void schedule();
 int get_earliest_deadline_task_index();
 
 int main()
 {
-  read_system();
+  read_system("samples/sistema3.txt");
   print_system();
 
   // calcula o tempo mínimo de execução do sistema com base no MMC dos períodos
   lcmp = lcm_period(tasks, num_tasks);
   printf("LCM: %d\n", lcmp);
 
-  if (is_schedulable())
+  // determina a taxa de utilização do sistema
+  float u = utilization();
+  printf("Utilization: %f\n", u);
+
+  // se a taxa de utilização for menor ou igual a 1, o sistema é escalonável
+  if (u <= 1)
   {
-    printf("The system is schedulable.\n");
+    printf("The system is schedulable.\n\n");
     schedule();
   }
   else
@@ -134,19 +139,19 @@ int get_earliest_deadline_task_index()
   return earliest_deadline_task;
 }
 
-// função para determinar se o sistema é escalonável ou não
-bool is_schedulable()
+// função para calcular a taxa de utilização do sistema
+// e determinar se o sistema é escalonável ou não
+float utilization()
 {
   // somatório do (tempo de execução / intervalo) de cada tarefa
-  float condition = 0;
+  float result = 0;
   for (int i = 0; i < num_tasks; i++)
   {
     float c = tasks[i].execution_time;
     float t = tasks[i].period;
-    condition += c / t;
+    result += c / t;
   }
-  // caso o somatório seja menor ou igual a 1, o sistema é escalonável
-  return condition <= 1;
+  return result;
 }
 
 void print_system()
@@ -158,12 +163,12 @@ void print_system()
   }
 }
 
-void read_system()
+void read_system(const char* filename)
 {
   FILE *file;
   char line[100];
 
-  file = fopen("samples/sistema3.txt", "r");
+  file = fopen(filename, "r");
   if (file == NULL)
   {
     printf("Failed to open the file.\n");
